@@ -5,13 +5,13 @@ use {
         associated_token,
     },
 };
-use crate::create_token_mint::MintAuthorityPda;
+use crate::create_mint_auth::MintAuthorityPda;
 
 
 pub fn mint_to_another_wallet(
     ctx: Context<MintToAnotherWallet>,
     amount: u64,
-    mint_authority_pda_bump: u8,
+    mint_auth_bump: u8,
 ) -> Result<()> {
 
     msg!("Minting token to token account...");
@@ -26,9 +26,8 @@ pub fn mint_to_another_wallet(
                 authority: ctx.accounts.mint_authority.to_account_info(),
             },
             &[&[
-                b"mint_authority_",
-                ctx.accounts.mint_account.key().as_ref(),
-                &[mint_authority_pda_bump],
+                b"mint_auth_",
+                &[mint_auth_bump],
             ]]
         ),
         amount,
@@ -41,7 +40,7 @@ pub fn mint_to_another_wallet(
 
 
 #[derive(Accounts)]
-#[instruction(amount: u64, mint_authority_pda_bump: u8)]
+#[instruction(amount: u64, mint_auth_bump: u8)]
 pub struct MintToAnotherWallet<'info> {
     #[account(
         mut,
@@ -51,11 +50,8 @@ pub struct MintToAnotherWallet<'info> {
     pub mint_account: Account<'info, token::Mint>,
     #[account(
         mut,
-        seeds = [
-            b"mint_authority_",
-            mint_account.key().as_ref()
-        ],
-        bump = mint_authority_pda_bump
+        seeds = [ b"mint_auth_" ],
+        bump = mint_auth_bump
     )]
     pub mint_authority: Account<'info, MintAuthorityPda>,
     /// CHECK: This is for airdrops

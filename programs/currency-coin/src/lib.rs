@@ -1,20 +1,43 @@
 use anchor_lang::prelude::*;
+pub mod instructions;
+use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("GNeXjvGUjXqYLUd2SXeZSsKB8EE4vxE3wfWS3HcNxMPE");
 
 #[program]
 pub mod currency_coin {
     use super::*;
 
-    pub fn create_token_mint(
-        ctx: Context<CreateTokenMint>,
+    pub fn create_mint_auth(
+        ctx: Context<CreateMintAuth>,
+    ) -> Result<()> {
+        create_mint_auth::create_mint_auth(ctx)
+    }
+    
+    pub fn create_cc_mint(
+        ctx: Context<CreateCcMint>,
         metadata_title: String,
         metadata_symbol: String,
         metadata_uri: String,
         mint_authority_pda_bump: u8,
     ) -> Result<()> {
+        create_cc_mint::create_cc_mint(
+            ctx,
+            metadata_title,
+            metadata_symbol,
+            metadata_uri,
+            mint_authority_pda_bump,
+        )
+    }
 
-        create_token_mint::create_token_mint(
+    pub fn create_ccb0_mint(
+        ctx: Context<CreateCcb0Mint>,
+        metadata_title: String,
+        metadata_symbol: String,
+        metadata_uri: String,
+        mint_authority_pda_bump: u8,
+    ) -> Result<()> {
+        create_ccb0_mint::create_ccb0_mint(
             ctx,
             metadata_title,
             metadata_symbol,
@@ -29,7 +52,6 @@ pub mod currency_coin {
         mint_bump: u8,
         mint_authority_pda_bump: u8,
     ) -> Result<()> {
-
         mint_to_your_wallet::mint_to_your_wallet(
             ctx,
             amount,

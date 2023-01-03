@@ -6,18 +6,16 @@ use {
     anchor_spl::token,
     mpl_token_metadata::instruction as mpl_instruction,
 };
+use crate::create_mint_auth::MintAuthorityPda;
 
-
-pub fn create_token_mint(
-    ctx: Context<CreateTokenMint>,
+pub fn create_cc_mint(
+    ctx: Context<CreateCcMint>,
     metadata_title: String,
     metadata_symbol: String,
     metadata_uri: String,
-    mint_authority_pda_bump: u8,
+    mint_auth_bump: u8,
 ) -> Result<()> {
-
-    msg!("Creating metadata account...");
-    msg!("Metadata account address: {}", &ctx.accounts.metadata_account.key());
+    // msg!("Metadata account address: {}", &ctx.accounts.metadata_account.key());
     invoke_signed(
         &mpl_instruction::create_metadata_accounts_v2(
             ctx.accounts.token_metadata_program.key(),      // Program ID (the Token Metadata Program)
@@ -46,21 +44,22 @@ pub fn create_token_mint(
         ],
         &[
             &[
-                b"mint_authority_",
-                ctx.accounts.mint_account.key().as_ref(),
-                &[mint_authority_pda_bump],
+                b"mint_auth_",
+                &[mint_auth_bump],
             ]
         ]
     )?;
-
-    msg!("Token mint created successfully.");
-
     Ok(())
 }
 
-
 #[derive(Accounts)]
-pub struct CreateTokenMint<'info> {
+#[instruction(
+    metadata_title: String,
+    metadata_symbol: String,
+    metadata_uri: String,
+    mint_auth_bump: u8,
+)]
+pub struct CreateCcMint<'info> {
     /// CHECK: We're about to create this with Metaplex
     #[account(mut)]
     pub metadata_account: UncheckedAccount<'info>,
@@ -72,15 +71,9 @@ pub struct CreateTokenMint<'info> {
         seeds = [ b"cc_mint_" ], bump
     )]
     pub mint_account: Account<'info, token::Mint>,
-    #[account(
-        init,
-        payer = payer,
-        space = 8 + 32,
-        seeds = [
-            b"mint_authority_",
-            mint_account.key().as_ref(),
-        ],
-        bump
+    #[account(mut,
+        seeds = [ b"mint_auth_" ],
+        bump = mint_auth_bump
     )]
     pub mint_authority: Account<'info, MintAuthorityPda>,
     #[account(mut)]
@@ -91,6 +84,3 @@ pub struct CreateTokenMint<'info> {
     /// CHECK: Metaplex will check this
     pub token_metadata_program: UncheckedAccount<'info>,
 }
-
-#[account]
-pub struct MintAuthorityPda {}
