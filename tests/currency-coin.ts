@@ -11,36 +11,31 @@ const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
 );
 
 describe("currency-coin", () => {
-  // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const payer = provider.wallet as anchor.Wallet;
   const program = anchor.workspace.CurrencyCoin as anchor.Program<CurrencyCoin>;
 
-  // console.log(cc_metadata);
-  /*
-  it("Created the authority pda which will be the authority account for all five coins, CC, CCB0, CCB1, CCS0, CCS1",
-    async () => {
-      const [ mintAuthorityPda, mintAuthorityPdaBump ] =
-        await anchor.web3.PublicKey.findProgramAddress(
-          [ Buffer.from("mint_authority_") ], program.programId
-        );
-    console.log(`mintAuthority ${mintAuthorityPdaBump} ${mintAuthorityPda}`);
-      await program.methods.createAuthorityPda().accounts({
-        mintAuthority: mintAuthorityPda,
-        payer: payer.publicKey,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      }).signers([payer.payer]).rpc();
-    });
-    */
+  it("Created the mint_auth account", async () => {
+    const [ mintAuth, mintAuthBump ] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [ Buffer.from("mint_auth_") ], program.programId
+      );
+    console.log(`mintAuth ${mintAuthBump} ${mintAuth}`);
+    await program.methods.createMintAuth().accounts({
+      mintAuthority: mintAuth,
+      payer: payer.publicKey,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    }).signers([payer.payer]).rpc();
+  });
 
   it("Created CC Mint", async () => {
-    const [ mintAuthorityPda, mintAuthorityPdaBump ] =
+    const [ mintAuth, mintAuthBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
-        [ Buffer.from("cc_mint_authority_") ], program.programId
+        [ Buffer.from("mint_auth_") ], program.programId
       );
-    console.log(`mintAuthority ${mintAuthorityPdaBump} ${mintAuthorityPda}`);
+    console.log(`mintAuth ${mintAuthBump} ${mintAuth}`);
     const [ ccMint, ccMintBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("cc_mint_") ], program.programId
@@ -56,15 +51,14 @@ describe("currency-coin", () => {
       );
     console.log(`ccMeta ${ccMetaBump} ${ccMeta}`);
 
-    const cc_uri = "https://github.com/cloorem2/currency-coin/blob/main/cc_metadata.json";
+    const cc_uri = "https://githubraw.com/cloorem2/currency-coin/main/cc_metadata.json";
     const tx = await program.methods.createCcMint(
-      "Currency Coin", "CC",
-      // cc_metadata.name, cc_metadata.symbol,
-      cc_uri, mintAuthorityPdaBump
+      cc_metadata.name, cc_metadata.symbol,
+      cc_uri, mintAuthBump
     ).accounts({
       metadataAccount: ccMeta,
       mintAccount: ccMint,
-      mintAuthority: mintAuthorityPda,
+      mintAuthority: mintAuth,
       payer: payer.publicKey,
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       systemProgram: anchor.web3.SystemProgram.programId,
@@ -75,11 +69,11 @@ describe("currency-coin", () => {
   });
 
   it("Created CCB0 Mint", async () => {
-    const [ mintAuthorityPda, mintAuthorityPdaBump ] =
+    const [ mintAuth, mintAuthBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
-        [ Buffer.from("cc_mint_authority_") ], program.programId
+        [ Buffer.from("mint_auth_") ], program.programId
       );
-    console.log(`ccb0MintAuthority ${mintAuthorityPdaBump} ${mintAuthorityPda}`);
+    console.log(`mintAuth ${mintAuthBump} ${mintAuth}`);
     const [ ccb0Mint, ccb0MintBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("ccb0_mint_") ], program.programId
@@ -95,14 +89,14 @@ describe("currency-coin", () => {
       );
     console.log(`ccb0Meta ${ccb0MetaBump} ${ccb0Meta}`);
 
-    const ccb0_uri = "https://github.com/cloorem2/currency-coin/blob/main/ccb_metadata.json";
+    const ccb0_uri = "https://githubraw.com/cloorem2/currency-coin/main/ccb_metadata.json";
     const tx = await program.methods.createCcb0Mint(
       ccb_metadata.name, ccb_metadata.symbol,
-      ccb0_uri, mintAuthorityPdaBump
+      ccb0_uri, mintAuthBump
     ).accounts({
       metadataAccount: ccb0Meta,
       mintAccount: ccb0Mint,
-      mintAuthority: mintAuthorityPda,
+      mintAuthority: mintAuth,
       payer: payer.publicKey,
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       systemProgram: anchor.web3.SystemProgram.programId,
@@ -112,12 +106,13 @@ describe("currency-coin", () => {
     console.log(`tx ${tx}`);
   });
 
+  /*
   it("mint me some cc", async () => {
-    const [ mintAuthorityPda, mintAuthorityPdaBump ] =
+    const [ mintAuth, mintAuthBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
-        [ Buffer.from("cc_mint_authority_") ], program.programId
+        [ Buffer.from("mint_auth_") ], program.programId
       );
-    console.log(`mintAuthority ${mintAuthorityPdaBump} ${mintAuthorityPda}`);
+    console.log(`mintAuth ${mintAuthBump} ${mintAuth}`);
     const [ ccMint, ccMintBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("cc_mint_") ], program.programId
@@ -132,10 +127,10 @@ describe("currency-coin", () => {
     console.log(`my ata: ${tokenAddress}`);
 
     const tx = await program.methods.mintToYourWallet(
-      new anchor.BN(amountToMint), ccMintBump, mintAuthorityPdaBump
+      new anchor.BN(amountToMint), ccMintBump, mintAuthBump
     ).accounts({
       mintAccount: ccMint,
-      mintAuthority: mintAuthorityPda,
+      mintAuthority: mintAuth,
       tokenAccount: tokenAddress,
       payer: payer.publicKey,
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
@@ -145,6 +140,8 @@ describe("currency-coin", () => {
     }).signers([payer.payer]).rpc();
     console.log(`tx ${tx}`);
   })
+  */
+
     /*
   it("Is initialized!", async () => {
     // Add your test here.

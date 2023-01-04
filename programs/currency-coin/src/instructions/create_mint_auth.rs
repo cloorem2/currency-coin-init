@@ -1,10 +1,7 @@
 use {
     anchor_lang::{
         prelude::*,
-        solana_program::program::invoke_signed,
     },
-    anchor_spl::token,
-    mpl_token_metadata::instruction as mpl_instruction,
 };
 
 pub fn create_mint_auth(
@@ -26,9 +23,6 @@ pub struct CreateMintAuth<'info> {
     pub payer: Signer<'info>,
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, token::Token>,
-    /// CHECK: Metaplex will check this
-    pub token_metadata_program: UncheckedAccount<'info>,
 }
 
 #[account]

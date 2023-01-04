@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 pub mod instructions;
 use instructions::*;
 
-declare_id!("GNeXjvGUjXqYLUd2SXeZSsKB8EE4vxE3wfWS3HcNxMPE");
+declare_id!("DbarUMKm62WkgTwiBTE9VykHL2yytNDpD4R2ypx1SHPu");
 
 #[program]
 pub mod currency_coin {
@@ -13,7 +13,7 @@ pub mod currency_coin {
     ) -> Result<()> {
         create_mint_auth::create_mint_auth(ctx)
     }
-    
+
     pub fn create_cc_mint(
         ctx: Context<CreateCcMint>,
         metadata_title: String,

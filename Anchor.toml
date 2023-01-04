@@ -1,7 +1,7 @@
 [features]
 seeds = false
 [programs.devnet]
-currency_coin = "GNeXjvGUjXqYLUd2SXeZSsKB8EE4vxE3wfWS3HcNxMPE"
+currency_coin = "DbarUMKm62WkgTwiBTE9VykHL2yytNDpD4R2ypx1SHPu"
 
 [registry]
 url = "https://anchor.projectserum.com"
