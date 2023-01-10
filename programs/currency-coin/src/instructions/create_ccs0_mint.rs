@@ -4,8 +4,8 @@ use {
 };
 use crate::create_mint_auth::MintAuth;
 
-pub fn create_ccb0_mint(
-    ctx: Context<CreateCcb0Mint>,
+pub fn create_ccs0_mint(
+    ctx: Context<CreateCcs0Mint>,
     mint_auth_bump: u8,
 ) -> Result<()> {
     token::set_authority(
@@ -28,7 +28,7 @@ pub fn create_ccb0_mint(
 
 #[derive(Accounts)]
 #[instruction(mint_auth_bump: u8)]
-pub struct CreateCcb0Mint<'info> {
+pub struct CreateCcs0Mint<'info> {
     #[account(mut,
         seeds = [ b"mint_auth_" ],
         bump = mint_auth_bump
@@ -38,7 +38,7 @@ pub struct CreateCcb0Mint<'info> {
         payer = payer,
         mint::decimals = 0,
         mint::authority = mint_authority.key(),
-        seeds = [ b"ccb0_mint_" ], bump
+        seeds = [ b"ccs0_mint_" ], bump
     )]
     pub mint_account: Account<'info, token::Mint>,
     #[account(mut)]

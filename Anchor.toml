@@ -1,14 +1,29 @@
 [features]
 seeds = false
-[programs.devnet]
-currency_coin = "DbarUMKm62WkgTwiBTE9VykHL2yytNDpD4R2ypx1SHPu"
+[programs.localnet]
+currency_coin = "9Xs2Dkn42QaeZwmTq7nN5gRbZXnwiUbCRTpjb4HJy65F"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "/home/hedgehog/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+create-mint-auth = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-mint-auth.ts"
+create-mints = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-mints.ts"
+create-cc-metadata = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-cc-metadata.ts"
+init-owner-ata = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-owner-ata.ts"
+init-atas = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-atas.ts"
+init-circulation = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-circulation.ts"
+init-pool0 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-pool0.ts"
+fetch-state = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/fetch-state.ts"
+buy-bonds0 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/buy-bonds0.ts"
+buy-bonds1 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/buy-bonds1.ts"
+redeem-bonds0 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/redeem-bonds0.ts"
+redeem-bonds1 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/redeem-bonds1.ts"
+crank0 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/crank0.ts"
+crank1 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/crank1.ts"
+crank3 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/crank3.ts"

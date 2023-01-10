@@ -5,7 +5,7 @@ use {
         associated_token,
     },
 };
-use crate::create_mint_auth::MintAuthorityPda;
+use crate::create_mint_auth::MintAuth;
 
 
 pub fn mint_to_pda_wallet(
@@ -44,16 +44,15 @@ pub fn mint_to_pda_wallet(
 pub struct MintToPdaWallet<'info> {
     #[account(
         mut,
-        mint::decimals = 9,
+        mint::decimals = 0,
         mint::authority = mint_authority.key(),
     )]
     pub mint_account: Account<'info, token::Mint>,
-    #[account(
-        mut,
+    #[account( mut,
         seeds = [ b"mint_auth_" ],
         bump = mint_auth_bump
     )]
-    pub mint_authority: Account<'info, MintAuthorityPda>,
+    pub mint_authority: Account<'info, MintAuth>,
     #[account(
         init,
         payer = payer,

@@ -7,16 +7,11 @@ use {
 };
 use crate::create_mint_auth::MintAuth;
 
-
-pub fn mint_to_another_wallet(
-    ctx: Context<MintToAnotherWallet>,
-    amount: u64,
+pub fn init_cc_ata(
+    ctx: Context<InitCcAta>,
     mint_auth_bump: u8,
+    mint_bump: u8,
 ) -> Result<()> {
-
-    msg!("Minting token to token account...");
-    msg!("Mint: {}", &ctx.accounts.mint_account.to_account_info().key());
-    msg!("Token Address: {}", &ctx.accounts.token_account.key());
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -30,35 +25,31 @@ pub fn mint_to_another_wallet(
                 &[mint_auth_bump],
             ]]
         ),
-        amount,
+        0,
     )?;
-
-    msg!("Token minted to wallet successfully.");
 
     Ok(())
 }
 
-
 #[derive(Accounts)]
-#[instruction(amount: u64, mint_auth_bump: u8)]
-pub struct MintToAnotherWallet<'info> {
-    #[account( mut,
-        mint::decimals = 0,
-        mint::authority = mint_authority.key(),
-    )]
-    pub mint_account: Account<'info, token::Mint>,
-    #[account( mut,
+#[instruction(mint_auth_bump: u8, mint_bump: u8)]
+pub struct InitCcAta<'info> {
+    #[account(mut,
         seeds = [ b"mint_auth_" ],
         bump = mint_auth_bump
     )]
     pub mint_authority: Account<'info, MintAuth>,
-    /// CHECK: This is for airdrops
-    pub recipient: UncheckedAccount<'info>,
-    #[account(
-        init,
+    #[account(mut,
+        mint::decimals = 0,
+        mint::authority = mint_authority.key(),
+        seeds = [ b"cc_mint_" ],
+        bump = mint_bump
+    )]
+    pub mint_account: Account<'info, token::Mint>,
+    #[account(init,
         payer = payer,
         associated_token::mint = mint_account,
-        associated_token::authority = recipient,
+        associated_token::authority = mint_authority,
     )]
     pub token_account: Account<'info, token::TokenAccount>,
     #[account(mut)]
