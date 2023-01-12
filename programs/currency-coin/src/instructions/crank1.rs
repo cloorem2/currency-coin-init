@@ -10,14 +10,13 @@ pub fn crank1(
     cc_mint_bump: u8,
     ccb0_mint_bump: u8,
     ccb1_mint_bump: u8,
-    // ccs0_mint_bump: u8,
-    // ccs1_mint_bump: u8,
+    ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 1);
-    let mut rmod: f64 = 2.0 - (ctx.accounts.mint_authority.isum - 1.0) / 2.0;
-    if rmod < 1.0 { rmod = 1.0; }
-    let x0 = (rmod * ctx.accounts.mint_authority.ccb_amount) as u64;
-    let x1 = 2 * (ctx.accounts.mint_authority.ccb_amount as u64) - x0;
+    let rmod = (ctx.accounts.mint_authority.cc0_amount
+        / ctx.accounts.mint_authority.ccb_amount - 1.0) / 2.0;
+    let x0 = ((rmod + 1.0) * ctx.accounts.mint_authority.ccb_amount).ceil();
+    let x1 = ctx.accounts.mint_authority.cc0_amount - x0;
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -30,22 +29,24 @@ pub fn crank1(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), x0,
+        ), x0 as u64,
     )?;
-    token::burn(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::Burn {
-                mint: ctx.accounts.cc_mint_account.to_account_info(),
-                from: ctx.accounts.cc_token_account.to_account_info(),
-                authority: ctx.accounts.mint_authority.to_account_info(),
-            },
-            &[&[
-                b"mint_auth_",
-                &[mint_auth_bump],
-            ]]
-        ), x1,
-    )?;
+    if x1 > 0.0 {
+        token::burn(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                token::Burn {
+                    mint: ctx.accounts.cc_mint_account.to_account_info(),
+                    from: ctx.accounts.cc_token_account.to_account_info(),
+                    authority: ctx.accounts.mint_authority.to_account_info(),
+                },
+                &[&[
+                    b"mint_auth_",
+                    &[mint_auth_bump],
+                ]]
+            ), x1 as u64,
+        )?;
+    }
     token::burn(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -60,13 +61,47 @@ pub fn crank1(
             ]]
         ), ctx.accounts.mint_authority.ccb_amount as u64,
     )?;
+
+
+    let x2 = (rmod * ctx.accounts.mint_authority.ccs_amount).ceil();
+    token::mint_to(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            token::MintTo {
+                mint: ctx.accounts.ccs0_mint_account.to_account_info(),
+                to: ctx.accounts.ccs0_token_account.to_account_info(),
+                authority: ctx.accounts.mint_authority.to_account_info(),
+            },
+            &[&[
+                b"mint_auth_",
+                &[mint_auth_bump],
+            ]]
+        ), x2 as u64,
+    )?;
+    let x3 = x0 - ctx.accounts.mint_authority.cc1_amount;
+    token::mint_to(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            token::MintTo {
+                mint: ctx.accounts.cc_mint_account.to_account_info(),
+                to: ctx.accounts.cc_token_account.to_account_info(),
+                authority: ctx.accounts.mint_authority.to_account_info(),
+            },
+            &[&[
+                b"mint_auth_",
+                &[mint_auth_bump],
+            ]]
+        ), x3 as u64,
+    )?;
+
     let pool0 = &mut ctx.accounts.mint_authority;
-    pool0.cc0_amount -= x1 as f64;
-    pool0.ccb_amount = x0 as f64;
-    // pool0.cc1_amount *= 2.0;
-    pool0.imod /= 2.0;
+    pool0.ccb_amount = x0;
+    pool0.cc0_amount -= x1;
+    pool0.ccs_amount += x2;
+    pool0.cc1_amount += x3;
+
+    pool0.imod /= 2.0 * rmod + 1.0;
     pool0.rmod = rmod;
-    pool0.isum = 1.0;
     pool0.maturity_state = 2;
     Ok(())
 }
@@ -77,8 +112,7 @@ pub fn crank1(
     cc_mint_bump: u8,
     ccb0_mint_bump: u8,
     ccb1_mint_bump: u8,
-    // ccs0_mint_bump: u8,
-    // ccs1_mint_bump: u8,
+    ccs0_mint_bump: u8,
 )]
 pub struct Crank1<'info> {
     #[account(mut,
@@ -102,18 +136,11 @@ pub struct Crank1<'info> {
         bump = ccb1_mint_bump
     )]
     pub ccb1_mint_account: Account<'info, token::Mint>,
-    /*
     #[account(mut,
         seeds = [ b"ccs0_mint_" ],
         bump = ccs0_mint_bump
     )]
     pub ccs0_mint_account: Account<'info, token::Mint>,
-    #[account(mut,
-        seeds = [ b"ccs1_mint_" ],
-        bump = ccs1_mint_bump
-    )]
-    pub ccs1_mint_account: Account<'info, token::Mint>,
-    */
 
     #[account(mut,
         associated_token::mint = cc_mint_account,
@@ -130,21 +157,10 @@ pub struct Crank1<'info> {
         associated_token::authority = mint_authority,
     )]
     pub ccb1_token_account: Box<Account<'info, token::TokenAccount>>,
-    /*
     #[account(mut,
         associated_token::mint = ccs0_mint_account,
         associated_token::authority = mint_authority,
     )]
     pub ccs0_token_account: Box<Account<'info, token::TokenAccount>>,
-    #[account(mut,
-        associated_token::mint = ccs1_mint_account,
-        associated_token::authority = mint_authority,
-    )]
-    pub ccs1_token_account: Box<Account<'info, token::TokenAccount>>,
-    */
-    // #[account(mut)]
-    // pub payer: Signer<'info>,
-    // pub system_program: Program<'info, System>,
     pub token_program: Program<'info, token::Token>,
-    // pub associated_token_program: Program<'info, associated_token::AssociatedToken>,
 }

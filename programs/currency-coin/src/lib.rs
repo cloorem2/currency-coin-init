@@ -162,8 +162,7 @@ pub mod currency_coin {
         cc_mint_bump: u8,
         ccb0_mint_bump: u8,
         ccb1_mint_bump: u8,
-        // ccs0_mint_bump: u8,
-        // ccs1_mint_bump: u8,
+        ccs0_mint_bump: u8,
     ) -> Result<()> {
         crank1::crank1(
             ctx,
@@ -171,8 +170,7 @@ pub mod currency_coin {
             cc_mint_bump,
             ccb0_mint_bump,
             ccb1_mint_bump,
-            // ccs0_mint_bump,
-            // ccs1_mint_bump,
+            ccs0_mint_bump,
         )
     }
 
@@ -182,8 +180,7 @@ pub mod currency_coin {
         cc_mint_bump: u8,
         ccb0_mint_bump: u8,
         ccb1_mint_bump: u8,
-        // ccs0_mint_bump: u8,
-        // ccs1_mint_bump: u8,
+        ccs0_mint_bump: u8,
     ) -> Result<()> {
         crank3::crank3(
             ctx,
@@ -191,8 +188,7 @@ pub mod currency_coin {
             cc_mint_bump,
             ccb0_mint_bump,
             ccb1_mint_bump,
-            // ccs0_mint_bump,
-            // ccs1_mint_bump,
+            ccs0_mint_bump,
         )
     }
 

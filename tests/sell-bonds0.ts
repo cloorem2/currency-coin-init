@@ -8,7 +8,7 @@ describe("currency-coin", () => {
   const payer = provider.wallet as anchor.Wallet;
   const program = anchor.workspace.CurrencyCoin as anchor.Program<CurrencyCoin>;
 
-  it("cranking 3", async () => {
+  it("sell bonds0", async () => {
     const [ mintAuth, mintAuthBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("mint_auth_") ], program.programId
@@ -27,12 +27,6 @@ describe("currency-coin", () => {
       );
     console.log(`ccb0Mint ${ccb0MintBump} ${ccb0Mint}`);
 
-    const [ ccb1Mint, ccb1MintBump ] =
-      await anchor.web3.PublicKey.findProgramAddress(
-        [ Buffer.from("ccb1_mint_") ], program.programId
-      );
-    console.log(`ccb1Mint ${ccb1MintBump} ${ccb1Mint}`);
-
     const [ ccs0Mint, ccs0MintBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("ccs0_mint_") ], program.programId
@@ -41,46 +35,53 @@ describe("currency-coin", () => {
 
     const cc_ata = await anchor.utils.token.associatedAddress({
       mint: ccMint,
-      owner: mintAuth
+      owner: mintAuth,
     });
     console.log(`cc_ata ${cc_ata}`);
 
     const ccb0_ata = await anchor.utils.token.associatedAddress({
       mint: ccb0Mint,
-      owner: mintAuth
+      owner: mintAuth,
     });
     console.log(`ccb0_ata ${ccb0_ata}`);
 
-    const ccb1_ata = await anchor.utils.token.associatedAddress({
-      mint: ccb1Mint,
-      owner: mintAuth
-    });
-    console.log(`ccb1_ata ${ccb1_ata}`);
-
     const ccs0_ata = await anchor.utils.token.associatedAddress({
       mint: ccs0Mint,
-      owner: mintAuth
+      owner: mintAuth,
     });
     console.log(`ccs0_ata ${ccs0_ata}`);
 
-    await program.methods.crank3(
+    const owner_cc_ata = await anchor.utils.token.associatedAddress({
+      mint: ccMint,
+      owner: payer.publicKey
+    });
+    console.log(`owner_cc_ata ${owner_cc_ata}`);
+
+    const owner_ccb0_ata = await anchor.utils.token.associatedAddress({
+      mint: ccb0Mint,
+      owner: payer.publicKey
+    });
+    console.log(`owner_ccb0_ata ${owner_ccb0_ata}`);
+
+    await program.methods.sellBonds0(
+      new anchor.BN(66000),
       mintAuthBump,
       ccMintBump,
       ccb0MintBump,
-      ccb1MintBump,
       ccs0MintBump,
     ).accounts({
       mintAuthority: mintAuth,
 
       ccMintAccount: ccMint,
       ccb0MintAccount: ccb0Mint,
-      ccb1MintAccount: ccb1Mint,
       ccs0MintAccount: ccs0Mint,
 
-      ccTokenAccount: cc_ata,
-      ccb0TokenAccount: ccb0_ata,
-      ccb1TokenAccount: ccb1_ata,
-      ccs0TokenAccount: ccs0_ata,
+      ownerCcAccount: owner_cc_ata,
+      ownerCcb0Account: owner_ccb0_ata,
+      ccAccount: cc_ata,
+      ccb0Account: ccb0_ata,
+      ccs0Account: ccs0_ata,
+      owner: payer.publicKey,
       tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
     }).signers([payer.payer]).rpc();
   });

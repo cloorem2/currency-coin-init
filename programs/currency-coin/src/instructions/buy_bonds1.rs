@@ -12,7 +12,6 @@ pub fn buy_bonds1(
     cc_mint_bump: u8,
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
-    // ccb1_mint_account: Pubkey,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     // let r0: u64 = ctx.accounts.mint_authority.cc0_amount;
@@ -23,13 +22,13 @@ pub fn buy_bonds1(
     // let r11: u64 = r1 - ccb_amount;
     // let cc_amount: u64 = (k - r0 * r11) / r11;
 
-    let mut bonds_to_owner = amount as f64;
-    bonds_to_owner += ctx.accounts.mint_authority.cc0_amount;
-    bonds_to_owner *= ctx.accounts.mint_authority.ccb_amount;
-    bonds_to_owner -= ctx.accounts.mint_authority.cc0_amount
+    let mut b1_to_owner = amount as f64;
+    b1_to_owner += ctx.accounts.mint_authority.cc0_amount;
+    b1_to_owner *= ctx.accounts.mint_authority.ccb_amount;
+    b1_to_owner -= ctx.accounts.mint_authority.cc0_amount
       * ctx.accounts.mint_authority.ccb_amount;
-    bonds_to_owner /= ctx.accounts.mint_authority.cc0_amount + amount as f64;
-    bonds_to_owner = bonds_to_owner.floor();
+    b1_to_owner /= ctx.accounts.mint_authority.cc0_amount + amount as f64;
+    b1_to_owner = b1_to_owner.floor();
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -42,15 +41,14 @@ pub fn buy_bonds1(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), bonds_to_owner as u64,
+        ), b1_to_owner as u64,
     )?;
 
-    let mut cc_from_owner = ctx.accounts.mint_authority.ccb_amount
-      - bonds_to_owner;
+    let mut cc_from_owner = ctx.accounts.mint_authority.ccb_amount - b1_to_owner;
     cc_from_owner *= ctx.accounts.mint_authority.cc0_amount;
     cc_from_owner = ctx.accounts.mint_authority.cc0_amount
       * ctx.accounts.mint_authority.ccb_amount - cc_from_owner;
-    cc_from_owner /= ctx.accounts.mint_authority.ccb_amount - bonds_to_owner;
+    cc_from_owner /= ctx.accounts.mint_authority.ccb_amount - b1_to_owner;
     cc_from_owner = cc_from_owner.ceil();
     token::transfer(
         CpiContext::new(
@@ -63,10 +61,27 @@ pub fn buy_bonds1(
         ), cc_from_owner as u64,
     )?;
 
-    let mut s0_to_mint = cc_from_owner;
+    token::burn(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            token::Burn {
+                mint: ctx.accounts.cc_mint_account.to_account_info(),
+                from: ctx.accounts.cc_account.to_account_info(),
+                authority: ctx.accounts.mint_authority.to_account_info(),
+            },
+            &[&[
+                b"mint_auth_",
+                &[mint_auth_bump],
+            ]]
+        ), b1_to_owner as u64,
+    )?;
+
+    let mut s0_to_mint = ctx.accounts.mint_authority.cc1_amount - b1_to_owner;
     s0_to_mint *= ctx.accounts.mint_authority.ccs_amount;
-    s0_to_mint /= ctx.accounts.mint_authority.cc0_amount;
-    s0_to_mint = s0_to_mint.ceil();
+    s0_to_mint = ctx.accounts.mint_authority.ccs_amount
+      * ctx.accounts.mint_authority.cc1_amount - s0_to_mint;
+    s0_to_mint /= ctx.accounts.mint_authority.cc1_amount - b1_to_owner;
+    s0_to_mint = s0_to_mint.floor();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -82,31 +97,9 @@ pub fn buy_bonds1(
         ), s0_to_mint as u64,
     )?;
 
-    let mut cc_to_burn = s0_to_mint;
-    cc_to_burn += ctx.accounts.mint_authority.ccs_amount;
-    cc_to_burn *= ctx.accounts.mint_authority.cc1_amount;
-    cc_to_burn -= ctx.accounts.mint_authority.cc1_amount
-      * ctx.accounts.mint_authority.ccs_amount;
-    cc_to_burn /= ctx.accounts.mint_authority.ccs_amount + s0_to_mint;
-    cc_to_burn = cc_to_burn.floor();
-    token::burn(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::Burn {
-                mint: ctx.accounts.cc_mint_account.to_account_info(),
-                from: ctx.accounts.cc_account.to_account_info(),
-                authority: ctx.accounts.mint_authority.to_account_info(),
-            },
-            &[&[
-                b"mint_auth_",
-                &[mint_auth_bump],
-            ]]
-        ), cc_to_burn as u64,
-    )?;
-
     ctx.accounts.mint_authority.cc0_amount += cc_from_owner;
-    ctx.accounts.mint_authority.ccb_amount -= bonds_to_owner;
-    ctx.accounts.mint_authority.cc1_amount -= cc_to_burn;
+    ctx.accounts.mint_authority.ccb_amount -= b1_to_owner;
+    ctx.accounts.mint_authority.cc1_amount -= b1_to_owner;
     ctx.accounts.mint_authority.ccs_amount += s0_to_mint;
     Ok(())
 }
@@ -119,8 +112,6 @@ pub fn buy_bonds1(
     cc_mint_bump: u8,
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
-    // cc_mint_account: Pubkey,
-    // ccb1_mint_account: Pubkey,
 )]
 pub struct BuyBonds1<'info> {
     #[account(mut,

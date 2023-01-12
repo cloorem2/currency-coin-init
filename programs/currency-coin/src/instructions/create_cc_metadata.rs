@@ -14,7 +14,7 @@ pub fn create_cc_metadata(
     metadata_symbol: String,
     metadata_uri: String,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
+    _cc_mint_bump: u8,
 ) -> Result<()> {
     // msg!("Metadata account address: {}", &ctx.accounts.metadata_account.key());
     invoke_signed(
@@ -63,16 +63,14 @@ pub fn create_cc_metadata(
 )]
 pub struct CreateCcMetadata<'info> {
     /// CHECK: We're about to create this with Metaplex
-    #[account( mut )]
+    #[account(mut)]
     pub metadata_account: UncheckedAccount<'info>,
-    #[account( mut,
+    #[account(mut,
         seeds = [ b"mint_auth_" ],
         bump = mint_auth_bump
     )]
     pub mint_authority: Account<'info, MintAuth>,
-    #[account( mut,
-        mint::decimals = 0,
-        mint::authority = mint_authority.key(),
+    #[account(mut,
         seeds = [ b"cc_mint_" ],
         bump = cc_mint_bump
     )]

@@ -11,6 +11,7 @@ pub fn init_circulation(
     ccb0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.cc0_amount,0.0);
+    /*
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -23,8 +24,9 @@ pub fn init_circulation(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), 4,
+        ), 2,
     )?;
+    */
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -37,7 +39,7 @@ pub fn init_circulation(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), 4,
+        ), 8000,
     )?;
     Ok(())
 }

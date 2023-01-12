@@ -12,9 +12,8 @@ pub fn sell_bonds1(
     cc_mint_bump: u8,
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
-    // ccb1_mint_account: Pubkey,
 ) -> Result<()> {
-    assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
+    assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     // let r0: u64 = ctx.accounts.mint_authority.cc0_amount;
     // let r1: u64 = ctx.accounts.mint_authority.ccb_amount;
     // let k: u64 = r0 * r1;
@@ -45,8 +44,7 @@ pub fn sell_bonds1(
         ), cc_to_owner as u64,
     )?;
 
-    let mut b1_from_owner = ctx.accounts.mint_authority.cc0_amount
-      - cc_to_owner;
+    let mut b1_from_owner = ctx.accounts.mint_authority.cc0_amount - cc_to_owner;
     b1_from_owner *= ctx.accounts.mint_authority.ccb_amount;
     b1_from_owner = ctx.accounts.mint_authority.ccb_amount
       * ctx.accounts.mint_authority.cc0_amount - b1_from_owner;
@@ -63,10 +61,28 @@ pub fn sell_bonds1(
         ), b1_from_owner as u64,
     )?;
 
-    let mut s0_to_burn = cc_to_owner;
+    // cc_to_mint = b1_from_owner
+    token::mint_to(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            token::MintTo {
+                mint: ctx.accounts.cc_mint_account.to_account_info(),
+                to: ctx.accounts.cc_account.to_account_info(),
+                authority: ctx.accounts.mint_authority.to_account_info(),
+            },
+            &[&[
+                b"mint_auth_",
+                &[mint_auth_bump],
+            ]]
+        ), b1_from_owner as u64,
+    )?;
+
+    let mut s0_to_burn = ctx.accounts.mint_authority.cc1_amount + b1_from_owner;
     s0_to_burn *= ctx.accounts.mint_authority.ccs_amount;
-    s0_to_burn /= ctx.accounts.mint_authority.cc0_amount;
-    s0_to_burn = s0_to_burn.floor();
+    s0_to_burn -= ctx.accounts.mint_authority.cc1_amount
+      * ctx.accounts.mint_authority.ccs_amount;
+    s0_to_burn /= ctx.accounts.mint_authority.cc1_amount + b1_from_owner;
+    s0_to_burn = s0_to_burn.ceil();
     token::burn(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -82,38 +98,9 @@ pub fn sell_bonds1(
         ), s0_to_burn as u64,
     )?;
 
-    // let mut b1_from_owner = ctx.accounts.mint_authority.cc0_amount
-      // - cc_to_owner;
-    // b1_from_owner *= ctx.accounts.mint_authority.ccb_amount;
-    // b1_from_owner = ctx.accounts.mint_authority.ccb_amount
-      // * ctx.accounts.mint_authority.cc0_amount - b1_from_owner;
-    // b1_from_owner /= ctx.accounts.mint_authority.cc0_amount - cc_to_owner;
-
-    let mut cc_to_mint = ctx.accounts.mint_authority.ccs_amount
-        - s0_to_burn;
-    cc_to_mint *= ctx.accounts.mint_authority.cc1_amount;
-    cc_to_mint = ctx.accounts.mint_authority.ccs_amount
-      * ctx.accounts.mint_authority.cc1_amount - cc_to_mint;
-    cc_to_mint /= ctx.accounts.mint_authority.ccs_amount - s0_to_burn;
-    cc_to_mint = cc_to_mint.ceil();
-    token::mint_to(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::MintTo {
-                mint: ctx.accounts.cc_mint_account.to_account_info(),
-                to: ctx.accounts.cc_account.to_account_info(),
-                authority: ctx.accounts.mint_authority.to_account_info(),
-            },
-            &[&[
-                b"mint_auth_",
-                &[mint_auth_bump],
-            ]]
-        ), cc_to_mint as u64,
-    )?;
-
     ctx.accounts.mint_authority.cc0_amount -= cc_to_owner;
     ctx.accounts.mint_authority.ccb_amount += b1_from_owner;
-    ctx.accounts.mint_authority.cc1_amount += cc_to_mint;
+    ctx.accounts.mint_authority.cc1_amount += b1_from_owner;
     ctx.accounts.mint_authority.ccs_amount -= s0_to_burn;
     Ok(())
 }
@@ -126,8 +113,6 @@ pub fn sell_bonds1(
     cc_mint_bump: u8,
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
-    // cc_mint_account: Pubkey,
-    // ccb1_mint_account: Pubkey,
 )]
 pub struct SellBonds1<'info> {
     #[account(mut,
@@ -179,7 +164,5 @@ pub struct SellBonds1<'info> {
     pub ccs0_account: Box<Account<'info, token::TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
-    // pub system_program: Program<'info, System>,
     pub token_program: Program<'info, token::Token>,
-    // pub associated_token_program: Program<'info, associated_token::AssociatedToken>,
 }

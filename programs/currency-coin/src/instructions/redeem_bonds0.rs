@@ -13,7 +13,9 @@ pub fn redeem_bonds0(
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     let x0 = (ctx.accounts.owner_ccb0_account.amount as f64
-        * ctx.accounts.mint_authority.rmod) as u64;
+        * (ctx.accounts.mint_authority.rmod + 1.0)).ceil() as u64;
+    let x1 = (ctx.accounts.owner_ccb0_account.amount as f64
+        * ctx.accounts.mint_authority.rmod).floor() as u64;
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -28,20 +30,22 @@ pub fn redeem_bonds0(
             ]]
         ), x0,
     )?;
-    token::mint_to(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::MintTo {
-                mint: ctx.accounts.cc_mint_account.to_account_info(),
-                to: ctx.accounts.owner_cc_account.to_account_info(),
-                authority: ctx.accounts.mint_authority.to_account_info(),
-            },
-            &[&[
-                b"mint_auth_",
-                &[mint_auth_bump],
-            ]]
-        ), 2 * ctx.accounts.owner_ccb0_account.amount - x0,
-    )?;
+    if x1 > 0 {
+        token::mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                token::MintTo {
+                    mint: ctx.accounts.cc_mint_account.to_account_info(),
+                    to: ctx.accounts.owner_cc_account.to_account_info(),
+                    authority: ctx.accounts.mint_authority.to_account_info(),
+                },
+                &[&[
+                    b"mint_auth_",
+                    &[mint_auth_bump],
+                ]]
+            ), x1,
+        )?;
+    }
     token::burn(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(),

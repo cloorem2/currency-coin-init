@@ -4,13 +4,13 @@ use {
 };
 use crate::create_mint_auth::MintAuth;
 
-pub fn sell_shorts0(
-    ctx: Context<SellShorts0>,
+pub fn sell_shorts1(
+    ctx: Context<SellShorts1>,
     // the most s0 seller is sending, we leave the dust behind
     amount: u64,
     mint_auth_bump: u8,
     cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
+    ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
@@ -62,32 +62,39 @@ pub fn sell_shorts0(
         ), s0_from_owner as u64,
     )?;
 
-    // b0_to_burn = cc_to_owner
-    // let mut b0_to_burn = cc_to_owner;
-    // b0_to_burn *= ctx.accounts.mint_authority.ccb_amount;
-    // b0_to_burn /= ctx.accounts.mint_authority.cc1_amount;
-    // b0_to_burn = b0_to_burn.floor();
+    let mut b1_to_burn = cc_to_owner;
+    b1_to_burn *= ctx.accounts.mint_authority.ccb_amount;
+    b1_to_burn /= ctx.accounts.mint_authority.cc1_amount;
+    b1_to_burn = b1_to_burn.floor();
     token::burn(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
             token::Burn {
-                mint: ctx.accounts.ccb0_mint_account.to_account_info(),
-                from: ctx.accounts.ccb0_account.to_account_info(),
+                mint: ctx.accounts.ccb1_mint_account.to_account_info(),
+                from: ctx.accounts.ccb1_account.to_account_info(),
                 authority: ctx.accounts.mint_authority.to_account_info(),
             },
             &[&[
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), cc_to_owner as u64,
+        ), b1_to_burn as u64,
     )?;
 
-    let mut cc_to_mint = ctx.accounts.mint_authority.ccb_amount - cc_to_owner;
+    // let mut s0_from_owner = ctx.accounts.mint_authority.cc0_amount
+      // - cc_to_owner;
+    // s0_from_owner *= ctx.accounts.mint_authority.ccb_amount;
+    // s0_from_owner = ctx.accounts.mint_authority.ccb_amount
+      // * ctx.accounts.mint_authority.cc0_amount - s0_from_owner;
+    // s0_from_owner /= ctx.accounts.mint_authority.cc0_amount - cc_to_owner;
+
+    let mut cc_to_mint = ctx.accounts.mint_authority.ccb_amount
+        - b1_to_burn;
     cc_to_mint *= ctx.accounts.mint_authority.cc0_amount;
     cc_to_mint = ctx.accounts.mint_authority.ccb_amount
       * ctx.accounts.mint_authority.cc0_amount - cc_to_mint;
-    cc_to_mint /= ctx.accounts.mint_authority.ccb_amount - cc_to_owner;
-    cc_to_mint = cc_to_mint.floor();
+    cc_to_mint /= ctx.accounts.mint_authority.ccb_amount - b1_to_burn;
+    cc_to_mint = cc_to_mint.ceil();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -104,7 +111,7 @@ pub fn sell_shorts0(
     )?;
 
     ctx.accounts.mint_authority.cc0_amount += cc_to_mint;
-    ctx.accounts.mint_authority.ccb_amount -= cc_to_owner;
+    ctx.accounts.mint_authority.ccb_amount -= b1_to_burn;
     ctx.accounts.mint_authority.cc1_amount -= cc_to_owner;
     ctx.accounts.mint_authority.ccs_amount += s0_from_owner;
     Ok(())
@@ -116,10 +123,10 @@ pub fn sell_shorts0(
     amount: u64,
     mint_auth_bump: u8,
     cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
+    ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
 )]
-pub struct SellShorts0<'info> {
+pub struct SellShorts1<'info> {
     #[account(mut,
         seeds = [ b"mint_auth_" ],
         bump = mint_auth_bump
@@ -132,10 +139,10 @@ pub struct SellShorts0<'info> {
     )]
     pub cc_mint_account: Account<'info, token::Mint>,
     #[account(mut,
-        seeds = [ b"ccb0_mint_" ],
-        bump = ccb0_mint_bump
+        seeds = [ b"ccb1_mint_" ],
+        bump = ccb1_mint_bump
     )]
-    pub ccb0_mint_account: Account<'info, token::Mint>,
+    pub ccb1_mint_account: Account<'info, token::Mint>,
     #[account(mut,
         seeds = [ b"ccs0_mint_" ],
         bump = ccs0_mint_bump
@@ -159,10 +166,10 @@ pub struct SellShorts0<'info> {
     )]
     pub cc_account: Box<Account<'info, token::TokenAccount>>,
     #[account(mut,
-        associated_token::mint = ccb0_mint_account,
+        associated_token::mint = ccb1_mint_account,
         associated_token::authority = mint_authority,
     )]
-    pub ccb0_account: Box<Account<'info, token::TokenAccount>>,
+    pub ccb1_account: Box<Account<'info, token::TokenAccount>>,
     #[account(mut,
         associated_token::mint = ccs0_mint_account,
         associated_token::authority = mint_authority,

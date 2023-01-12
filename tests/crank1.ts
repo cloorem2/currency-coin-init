@@ -33,19 +33,11 @@ describe("currency-coin", () => {
       );
     console.log(`ccb1Mint ${ccb1MintBump} ${ccb1Mint}`);
 
-    /*
     const [ ccs0Mint, ccs0MintBump ] =
       await anchor.web3.PublicKey.findProgramAddress(
         [ Buffer.from("ccs0_mint_") ], program.programId
       );
     console.log(`ccs0Mint ${ccs0MintBump} ${ccs0Mint}`);
-
-    const [ ccs1Mint, ccs1MintBump ] =
-      await anchor.web3.PublicKey.findProgramAddress(
-        [ Buffer.from("ccs1_mint_") ], program.programId
-      );
-    console.log(`ccs1Mint ${ccs1MintBump} ${ccs1Mint}`);
-    */
 
     const cc_ata = await anchor.utils.token.associatedAddress({
       mint: ccMint,
@@ -65,41 +57,30 @@ describe("currency-coin", () => {
     });
     console.log(`ccb1_ata ${ccb1_ata}`);
 
-    /*
     const ccs0_ata = await anchor.utils.token.associatedAddress({
       mint: ccs0Mint,
       owner: mintAuth
     });
     console.log(`ccs0_ata ${ccs0_ata}`);
 
-    const ccs1_ata = await anchor.utils.token.associatedAddress({
-      mint: ccs1Mint,
-      owner: mintAuth
-    });
-    console.log(`ccs1_ata ${ccs1_ata}`);
-    */
-
     await program.methods.crank1(
       mintAuthBump,
       ccMintBump,
       ccb0MintBump,
       ccb1MintBump,
-      // ccs0MintBump,
-      // ccs1MintBump,
+      ccs0MintBump,
     ).accounts({
       mintAuthority: mintAuth,
 
       ccMintAccount: ccMint,
       ccb0MintAccount: ccb0Mint,
       ccb1MintAccount: ccb1Mint,
-      // ccs0MintAccount: ccs0Mint,
-      // ccs1MintAccount: ccs1Mint,
+      ccs0MintAccount: ccs0Mint,
 
       ccTokenAccount: cc_ata,
       ccb0TokenAccount: ccb0_ata,
       ccb1TokenAccount: ccb1_ata,
-      // ccs0TokenAccount: ccs0_ata,
-      // ccs1TokenAccount: ccs1_ata,
+      ccs0TokenAccount: ccs0_ata,
       tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
     }).signers([payer.payer]).rpc();
   });

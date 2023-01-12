@@ -12,10 +12,11 @@ pub fn crank0(
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state == 0
         || ctx.accounts.mint_authority.maturity_state == 2, true);
-    let mut ir = ctx.accounts.mint_authority.ccb_amount
-      * ctx.accounts.mint_authority.imod;
-    ir = ir.floor();
-    if ir < 1.0 { ir = 1.0; }
+    let ir = ctx.accounts.mint_authority.ccb_amount
+        / ctx.accounts.mint_authority.cc0_amount
+        * ctx.accounts.mint_authority.imod;
+    let mut cc_to_mint = (ir * ctx.accounts.mint_authority.cc0_amount).floor();
+    if cc_to_mint < 1.0 { cc_to_mint = 1.0; }
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -28,47 +29,50 @@ pub fn crank0(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), ir as u64,
+        ), cc_to_mint as u64,
     )?;
 
-    let mut s0_ir = ctx.accounts.mint_authority.ccs_amount * ir;
-    s0_ir /= ctx.accounts.mint_authority.cc0_amount;
-    s0_ir = s0_ir.floor();
-    token::mint_to(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::MintTo {
-                mint: ctx.accounts.ccs0_mint_account.to_account_info(),
-                to: ctx.accounts.ccs0_token_account.to_account_info(),
-                authority: ctx.accounts.mint_authority.to_account_info(),
-            },
-            &[&[
-                b"mint_auth_",
-                &[mint_auth_bump],
-            ]]
-        ), s0_ir as u64,
-    )?;
+    let s0_to_mint = (ir * ctx.accounts.mint_authority.ccs_amount).floor();
+    if s0_to_mint > 0.0 {
+        token::mint_to(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                token::MintTo {
+                    mint: ctx.accounts.ccs0_mint_account.to_account_info(),
+                    to: ctx.accounts.ccs0_token_account.to_account_info(),
+                    authority: ctx.accounts.mint_authority.to_account_info(),
+                },
+                &[&[
+                    b"mint_auth_",
+                    &[mint_auth_bump],
+                ]]
+            ), s0_to_mint as u64,
+        )?;
+    }
     let pool0 = &mut ctx.accounts.mint_authority;
-    pool0.imod *= pool0.cc0_amount + ir;
-    pool0.imod /= pool0.cc0_amount;
-    pool0.isum *= pool0.cc0_amount + ir;
-    pool0.isum /= pool0.cc0_amount;
+    pool0.imod *= (pool0.cc0_amount + cc_to_mint) / pool0.cc0_amount;
 
-    pool0.ima0 *= 17280.0;
-    pool0.ima0 += (ir / pool0.cc0_amount) as f32;
-    pool0.ima0 /= 17281.0;
-
-    pool0.ima1 *= 518400.0;
-    pool0.ima1 += (ir / pool0.cc0_amount) as f32;
-    pool0.ima1 /= 518401.0;
-
-    pool0.cc0_amount += ir;
-    pool0.ccs_amount += s0_ir;
     let clock: Clock = Clock::get().unwrap();
-    assert_eq!(clock.unix_timestamp - pool0.timestamp >= 5, true);
+    let dt = clock.unix_timestamp - pool0.timestamp;
+    assert_eq!(dt >= 5, true);
     pool0.timestamp = clock.unix_timestamp;
+    let ips: f32 = (ir / pool0.cc0_amount / dt as f64) as f32;
+    pool0.ima0 *= 100.0;
+    pool0.ima0 += ips;
+    pool0.ima0 /= 101.0;
 
-    if pool0.cc0_amount >= 2.0 * pool0.ccb_amount {
+    pool0.ima1 *= 10000.0;
+    pool0.ima1 += ips;
+    pool0.ima1 /= 10001.0;
+
+    pool0.ima2 *= 1000000.0;
+    pool0.ima2 += ips;
+    pool0.ima2 /= 1000001.0;
+
+    pool0.cc0_amount += cc_to_mint;
+    pool0.ccs_amount += s0_to_mint;
+
+    if pool0.cc0_amount >= 1.01 * pool0.ccb_amount {
         if pool0.maturity_state == 0 { pool0.maturity_state = 1; }
         if pool0.maturity_state == 2 { pool0.maturity_state = 3; }
     }

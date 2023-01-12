@@ -12,9 +12,8 @@ pub fn buy_shorts1(
     cc_mint_bump: u8,
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
-    // ccb1_mint_account: Pubkey,
 ) -> Result<()> {
-    assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
+    assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     // let r0: u64 = ctx.accounts.mint_authority.cc1_amount;
     // let r1: u64 = ctx.accounts.mint_authority.ccs_amount;
     // let k: u64 = r0 * r1;
@@ -23,13 +22,13 @@ pub fn buy_shorts1(
     // let r11: u64 = r1 - ccs_amount;
     // let cc_amount: u64 = (k - r0 * r11) / r11;
 
-    let mut shorts_to_owner = amount as f64;
-    shorts_to_owner += ctx.accounts.mint_authority.cc1_amount;
-    shorts_to_owner *= ctx.accounts.mint_authority.ccs_amount;
-    shorts_to_owner -= ctx.accounts.mint_authority.cc1_amount
+    let mut s0_to_owner = amount as f64;
+    s0_to_owner += ctx.accounts.mint_authority.cc1_amount;
+    s0_to_owner *= ctx.accounts.mint_authority.ccs_amount;
+    s0_to_owner -= ctx.accounts.mint_authority.cc1_amount
       * ctx.accounts.mint_authority.ccs_amount;
-    shorts_to_owner /= ctx.accounts.mint_authority.cc1_amount + amount as f64;
-    shorts_to_owner = shorts_to_owner.floor();
+    s0_to_owner /= ctx.accounts.mint_authority.cc1_amount + amount as f64;
+    s0_to_owner = s0_to_owner.floor();
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -42,15 +41,14 @@ pub fn buy_shorts1(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), shorts_to_owner as u64,
+        ), s0_to_owner as u64,
     )?;
 
-    let mut cc_from_owner = ctx.accounts.mint_authority.ccs_amount
-      - shorts_to_owner;
+    let mut cc_from_owner = ctx.accounts.mint_authority.ccs_amount - s0_to_owner;
     cc_from_owner *= ctx.accounts.mint_authority.cc1_amount;
     cc_from_owner = ctx.accounts.mint_authority.cc1_amount
       * ctx.accounts.mint_authority.ccs_amount - cc_from_owner;
-    cc_from_owner /= ctx.accounts.mint_authority.ccs_amount - shorts_to_owner;
+    cc_from_owner /= ctx.accounts.mint_authority.ccs_amount - s0_to_owner;
     cc_from_owner = cc_from_owner.ceil();
     token::transfer(
         CpiContext::new(
@@ -63,10 +61,11 @@ pub fn buy_shorts1(
         ), cc_from_owner as u64,
     )?;
 
-    let mut b1_to_mint = cc_from_owner;
-    b1_to_mint *= ctx.accounts.mint_authority.ccb_amount;
-    b1_to_mint /= ctx.accounts.mint_authority.cc1_amount;
-    b1_to_mint = b1_to_mint.floor();
+    // b1_to_mint = cc_from_owner
+    // let mut b1_to_mint = cc_from_owner;
+    // b1_to_mint *= ctx.accounts.mint_authority.ccb_amount;
+    // b1_to_mint /= ctx.accounts.mint_authority.cc1_amount;
+    // b1_to_mint = b1_to_mint.floor();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -79,15 +78,14 @@ pub fn buy_shorts1(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), b1_to_mint as u64,
+        ), cc_from_owner as u64,
     )?;
 
-    let mut cc_to_burn = b1_to_mint;
-    cc_to_burn += ctx.accounts.mint_authority.ccb_amount;
+    let mut cc_to_burn = ctx.accounts.mint_authority.ccb_amount + cc_from_owner;
     cc_to_burn *= ctx.accounts.mint_authority.cc0_amount;
-    cc_to_burn -= ctx.accounts.mint_authority.cc0_amount
-      * ctx.accounts.mint_authority.ccb_amount;
-    cc_to_burn /= ctx.accounts.mint_authority.ccb_amount + b1_to_mint;
+    cc_to_burn -= ctx.accounts.mint_authority.ccb_amount
+      * ctx.accounts.mint_authority.cc0_amount;
+    cc_to_burn /= ctx.accounts.mint_authority.ccb_amount + cc_from_owner;
     cc_to_burn = cc_to_burn.floor();
     token::burn(
         CpiContext::new_with_signer(
@@ -105,9 +103,9 @@ pub fn buy_shorts1(
     )?;
 
     ctx.accounts.mint_authority.cc1_amount += cc_from_owner;
-    ctx.accounts.mint_authority.ccs_amount -= shorts_to_owner;
+    ctx.accounts.mint_authority.ccs_amount -= s0_to_owner;
     ctx.accounts.mint_authority.cc0_amount -= cc_to_burn;
-    ctx.accounts.mint_authority.ccb_amount += b1_to_mint;
+    ctx.accounts.mint_authority.ccb_amount += cc_from_owner;
     Ok(())
 }
 

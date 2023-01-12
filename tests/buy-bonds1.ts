@@ -64,13 +64,11 @@ describe("currency-coin", () => {
     console.log(`owner_ccb1_ata ${owner_ccb1_ata}`);
 
     await program.methods.buyBonds1(
-      new anchor.BN(10),
+      new anchor.BN(49),
       mintAuthBump,
       ccMintBump,
       ccb1MintBump,
       ccs0MintBump,
-      // ccMint,
-      // ccb1Mint,
     ).accounts({
       mintAuthority: mintAuth,
 

@@ -10,7 +10,7 @@ use crate::create_mint_auth::MintAuth;
 pub fn init_cc_ata(
     ctx: Context<InitCcAta>,
     mint_auth_bump: u8,
-    mint_bump: u8,
+    _mint_bump: u8,
 ) -> Result<()> {
     token::mint_to(
         CpiContext::new_with_signer(

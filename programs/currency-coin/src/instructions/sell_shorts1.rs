@@ -13,7 +13,7 @@ pub fn sell_shorts1(
     ccb1_mint_bump: u8,
     ccs0_mint_bump: u8,
 ) -> Result<()> {
-    assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
+    assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     // let r0: u64 = ctx.accounts.mint_authority.cc1_amount;
     // let r1: u64 = ctx.accounts.mint_authority.ccs_amount;
     // let k: u64 = r0 * r1;
@@ -62,10 +62,11 @@ pub fn sell_shorts1(
         ), s0_from_owner as u64,
     )?;
 
-    let mut b1_to_burn = cc_to_owner;
-    b1_to_burn *= ctx.accounts.mint_authority.ccb_amount;
-    b1_to_burn /= ctx.accounts.mint_authority.cc1_amount;
-    b1_to_burn = b1_to_burn.floor();
+    // b1_to_burn = cc_to_owner
+    // let mut b1_to_burn = cc_to_owner;
+    // b1_to_burn *= ctx.accounts.mint_authority.ccb_amount;
+    // b1_to_burn /= ctx.accounts.mint_authority.cc1_amount;
+    // b1_to_burn = b1_to_burn.floor();
     token::burn(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -78,23 +79,15 @@ pub fn sell_shorts1(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), b1_to_burn as u64,
+        ), cc_to_owner as u64,
     )?;
 
-    // let mut s0_from_owner = ctx.accounts.mint_authority.cc0_amount
-      // - cc_to_owner;
-    // s0_from_owner *= ctx.accounts.mint_authority.ccb_amount;
-    // s0_from_owner = ctx.accounts.mint_authority.ccb_amount
-      // * ctx.accounts.mint_authority.cc0_amount - s0_from_owner;
-    // s0_from_owner /= ctx.accounts.mint_authority.cc0_amount - cc_to_owner;
-
-    let mut cc_to_mint = ctx.accounts.mint_authority.ccb_amount
-        - b1_to_burn;
+    let mut cc_to_mint = ctx.accounts.mint_authority.ccb_amount - cc_to_owner;
     cc_to_mint *= ctx.accounts.mint_authority.cc0_amount;
     cc_to_mint = ctx.accounts.mint_authority.ccb_amount
       * ctx.accounts.mint_authority.cc0_amount - cc_to_mint;
-    cc_to_mint /= ctx.accounts.mint_authority.ccb_amount - b1_to_burn;
-    cc_to_mint = cc_to_mint.ceil();
+    cc_to_mint /= ctx.accounts.mint_authority.ccb_amount - cc_to_owner;
+    cc_to_mint = cc_to_mint.floor();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -111,7 +104,7 @@ pub fn sell_shorts1(
     )?;
 
     ctx.accounts.mint_authority.cc0_amount += cc_to_mint;
-    ctx.accounts.mint_authority.ccb_amount -= b1_to_burn;
+    ctx.accounts.mint_authority.ccb_amount -= cc_to_owner;
     ctx.accounts.mint_authority.cc1_amount -= cc_to_owner;
     ctx.accounts.mint_authority.ccs_amount += s0_from_owner;
     Ok(())
