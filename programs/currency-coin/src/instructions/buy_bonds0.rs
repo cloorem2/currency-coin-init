@@ -9,9 +9,9 @@ pub fn buy_bonds0(
     // the most cc buyer is sending, we leave the dust behind
     amount: u64,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
-    ccs0_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccb0_mint_bump: u8,
+    _ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
     // let r0: u64 = ctx.accounts.mint_authority.cc0_amount;

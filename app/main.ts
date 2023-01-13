@@ -26,6 +26,7 @@ var state;
 
 let balances = {};
 let crank_count = 0;
+let buyAm = 0;
 async function start() {
   await init();
   await getBalances();
@@ -42,6 +43,9 @@ async function start() {
           await getBalances();
         }
         if (ima > 1.0) {
+          buyAm = balances[ccKey] / 100;
+          if (ima > 2.0) { buyAm = balances[ccKey] / 10; }
+          if (ima > 3.0) { buyAm = balances[ccKey]; }
           await buy_bonds0();
           await getBalances();
         }
@@ -64,6 +68,9 @@ async function start() {
           await getBalances();
         }
         if (ima > 1.0) {
+          buyAm = balances[ccKey] / 100;
+          if (ima > 2.0) { buyAm = balances[ccKey] / 10; }
+          if (ima > 3.0) { buyAm = balances[ccKey]; }
           await buy_bonds1();
           await getBalances();
         }
@@ -175,18 +182,17 @@ async function sell_bonds0() {
 }
 
 async function buy_bonds1() {
-  let tcc = balances[ccKey] / 100;
   let maxx0 = -balances[s0Key];
-  let maxx1 = tcc - maxx0 / state.ccsAmount * state.cc1Amount;
-  for (let x0 = 0; x0 < tcc; x0++) {
-    let x1 = (tcc - x0) * (state.cc1Amount + x0) / state.cc1Amount;
+  let maxx1 = buyAm - maxx0 / state.ccsAmount * state.cc1Amount;
+  for (let x0 = 0; x0 < buyAm; x0++) {
+    let x1 = (buyAm - x0) * (state.cc1Amount + x0) / state.cc1Amount;
     if (x1 > maxx1) {
       maxx1 = x1;
       maxx0 = x0;
     }
   }
   console.log('   buying ' + maxx0 + ' shorts and '
-    + (tcc - maxx0).toString() + ' b1s');
+    + (buyAm - maxx0).toString() + ' b1s');
   if (maxx0 > 0) {
     try {
       await program.methods.buyShorts1(
@@ -247,10 +253,10 @@ async function buy_bonds1() {
     } catch { console.log('sellShorts1 fail'); }
   }
 
-  if (tcc - maxx0 > 0) {
+  if (buyAm - maxx0 > 0) {
     try {
       await program.methods.buyBonds1(
-        new anchor.BN(tcc - maxx0),
+        new anchor.BN(buyAm - maxx0),
         mintAuthBump,
         ccMintBump,
         ccb1MintBump,
@@ -278,18 +284,17 @@ async function buy_bonds1() {
 }
 
 async function buy_bonds0() {
-  let tcc = balances[ccKey] / 100;
   let maxx0 = -balances[s0Key];
-  let maxx1 = tcc - maxx0 / state.ccsAmount * state.cc1Amount;
-  for (let x0 = 0; x0 < tcc; x0++) {
-    let x1 = (tcc - x0) * (state.cc1Amount + x0) / state.cc1Amount;
+  let maxx1 = buyAm - maxx0 / state.ccsAmount * state.cc1Amount;
+  for (let x0 = 0; x0 < buyAm; x0++) {
+    let x1 = (buyAm - x0) * (state.cc1Amount + x0) / state.cc1Amount;
     if (x1 > maxx1) {
       maxx1 = x1;
       maxx0 = x0;
     }
   }
   console.log('   buying ' + maxx0 + ' shorts and '
-    + (tcc - maxx0).toString() + ' b0s');
+    + (buyAm - maxx0).toString() + ' b0s');
   if (maxx0 > 0) {
     try {
       await program.methods.buyShorts0(
@@ -350,10 +355,10 @@ async function buy_bonds0() {
     } catch { console.log('sellShorts0 fail'); }
   }
 
-  if (tcc - maxx0 > 0) {
+  if (buyAm - maxx0 > 0) {
     try {
       await program.methods.buyBonds0(
-        new anchor.BN(tcc - maxx0),
+        new anchor.BN(buyAm - maxx0),
         mintAuthBump,
         ccMintBump,
         ccb0MintBump,

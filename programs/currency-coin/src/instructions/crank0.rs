@@ -7,8 +7,8 @@ use crate::create_mint_auth::MintAuth;
 pub fn crank0(
     ctx: Context<Crank0>,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccs0_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state == 0
         || ctx.accounts.mint_authority.maturity_state == 2, true);
@@ -53,10 +53,16 @@ pub fn crank0(
     pool0.imod *= (pool0.cc0_amount + cc_to_mint) / pool0.cc0_amount;
 
     let clock: Clock = Clock::get().unwrap();
+    // if pool0.cc0_amount >= 1.01 * pool0.ccb_amount {
+    if clock.unix_timestamp % 1000 < pool0.timestamp % 1000 {
+        if pool0.maturity_state == 0 { pool0.maturity_state = 1; }
+        if pool0.maturity_state == 2 { pool0.maturity_state = 3; }
+    }
     let dt = clock.unix_timestamp - pool0.timestamp;
     assert_eq!(dt >= 5, true);
     pool0.timestamp = clock.unix_timestamp;
-    let ips: f32 = (ir / pool0.cc0_amount / dt as f64) as f32;
+    // let ips: f32 = (ir / pool0.cc0_amount / dt as f64) as f32;
+    let ips = (ir / dt as f64) as f32;
     pool0.ima0 *= 100.0;
     pool0.ima0 += ips;
     pool0.ima0 /= 101.0;
@@ -72,10 +78,6 @@ pub fn crank0(
     pool0.cc0_amount += cc_to_mint;
     pool0.ccs_amount += s0_to_mint;
 
-    if pool0.cc0_amount >= 1.01 * pool0.ccb_amount {
-        if pool0.maturity_state == 0 { pool0.maturity_state = 1; }
-        if pool0.maturity_state == 2 { pool0.maturity_state = 3; }
-    }
 
     Ok(())
 }

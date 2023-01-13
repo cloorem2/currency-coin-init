@@ -31,11 +31,6 @@ pub mod sell_shorts1;
 pub mod redeem_bonds0;
 pub mod redeem_bonds1;
 
-pub mod mint_to_your_wallet;
-pub mod mint_to_auth_pda_ata;
-pub mod mint_to_another_wallet;
-pub mod transfer_to_another_wallet;
-
 
 pub use create_mint_auth::*;
 
@@ -45,7 +40,6 @@ pub use create_ccb0_mint::*;
 pub use create_ccb1_mint::*;
 pub use create_ccs0_mint::*;
 
-// pub use init_atas::*;
 pub use init_cc_ata::*;
 pub use init_ccb0_ata::*;
 pub use init_ccb1_ata::*;
@@ -69,8 +63,3 @@ pub use sell_shorts0::*;
 pub use sell_shorts1::*;
 pub use redeem_bonds0::*;
 pub use redeem_bonds1::*;
-
-pub use mint_to_your_wallet::*;
-pub use mint_to_auth_pda_ata::*;
-pub use mint_to_another_wallet::*;
-pub use transfer_to_another_wallet::*;

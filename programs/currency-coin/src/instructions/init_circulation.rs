@@ -7,8 +7,8 @@ use crate::create_mint_auth::MintAuth;
 pub fn init_circulation(
     ctx: Context<InitCirculation>,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccb0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.cc0_amount,0.0);
     /*
@@ -39,7 +39,7 @@ pub fn init_circulation(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), 8000,
+        ), 9000000000,
     )?;
     Ok(())
 }

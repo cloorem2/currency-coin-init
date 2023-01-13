@@ -7,10 +7,10 @@ use crate::create_mint_auth::MintAuth;
 pub fn crank1(
     ctx: Context<Crank1>,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
-    ccb1_mint_bump: u8,
-    ccs0_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccb0_mint_bump: u8,
+    _ccb1_mint_bump: u8,
+    _ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 1);
     let rmod = (ctx.accounts.mint_authority.cc0_amount

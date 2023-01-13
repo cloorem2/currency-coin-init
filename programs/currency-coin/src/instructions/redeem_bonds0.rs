@@ -7,9 +7,9 @@ use crate::create_mint_auth::MintAuth;
 pub fn redeem_bonds0(
     ctx: Context<RedeemBonds0>,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
-    ccb1_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccb0_mint_bump: u8,
+    _ccb1_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 2);
     let x0 = (ctx.accounts.owner_ccb0_account.amount as f64

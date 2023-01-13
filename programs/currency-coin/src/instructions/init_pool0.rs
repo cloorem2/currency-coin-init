@@ -7,12 +7,12 @@ use crate::create_mint_auth::MintAuth;
 pub fn init_pool0(
     ctx: Context<InitPool0>,
     mint_auth_bump: u8,
-    cc_mint_bump: u8,
-    ccb0_mint_bump: u8,
-    ccs0_mint_bump: u8,
+    _cc_mint_bump: u8,
+    _ccb0_mint_bump: u8,
+    _ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.cc0_amount,0.0);
-    let x0: u64 = 10000;
+    let x0: u64 = 10000000000;
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -53,14 +53,14 @@ pub fn init_pool0(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), 1,
+        ), 1000000,
     )?;
     let pool0 = &mut ctx.accounts.mint_authority;
     pool0.cc0_amount = x0 as f64;
     pool0.ccb_amount = x0 as f64;
     pool0.cc1_amount = x0 as f64;
-    pool0.ccs_amount = 1.0;
-    pool0.imod = 0.01;
+    pool0.ccs_amount = 1000000.0;
+    pool0.imod = 0.000001;
     pool0.rmod = 1.0;
     let clock: Clock = Clock::get().unwrap();
     pool0.timestamp = clock.unix_timestamp;
