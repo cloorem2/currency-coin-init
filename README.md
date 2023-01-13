@@ -1,4 +1,4 @@
-# currency-coin
+# Currency Coin
 Currency for a new era
 
 Four coins
@@ -24,6 +24,9 @@ The bonds are repriced back to a CC.
 CC is put into circulation.
 
 And the bonds increase their liquidity in the pool.
+
+More subtly this means that you don't have to sell to extract interest,
+so that forces on the interest rate are balanced.
 
 
 # The interest rate is affected only by buying and selling
