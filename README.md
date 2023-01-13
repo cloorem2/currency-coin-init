@@ -26,5 +26,6 @@ CC is put into circulation.
 And the bonds increase their liquidity in the pool.
 
 
-The interest rate is affected only by buying and selling of the bond
-and the short.
+# The interest rate is affected only by buying and selling
+Buying the short increases the rate by the same amount as selling the bond,
+and vice versa.
