@@ -15,8 +15,7 @@ pub fn crank0(
     let ir = ctx.accounts.mint_authority.ccb_amount
         / ctx.accounts.mint_authority.cc0_amount
         * ctx.accounts.mint_authority.imod;
-    let mut cc_to_mint = (ir * ctx.accounts.mint_authority.cc0_amount).floor();
-    if cc_to_mint < 1.0 { cc_to_mint = 1.0; }
+    let cc_to_mint = (ir * ctx.accounts.mint_authority.cc0_amount).floor();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),

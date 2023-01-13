@@ -15,7 +15,7 @@ pub fn crank3(
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 3);
     let rmod = (ctx.accounts.mint_authority.cc0_amount
         / ctx.accounts.mint_authority.ccb_amount - 1.0) / 2.0;
-    let x0 = ((rmod + 1.0) * ctx.accounts.mint_authority.ccb_amount).ceil();
+    let x0 = ((rmod + 1.0) * ctx.accounts.mint_authority.ccb_amount).floor();
     let x1 = ctx.accounts.mint_authority.cc0_amount - x0;
     token::mint_to(
         CpiContext::new_with_signer(
@@ -62,7 +62,7 @@ pub fn crank3(
         ), ctx.accounts.mint_authority.ccb_amount as u64,
     )?;
 
-    let x2 = (rmod * ctx.accounts.mint_authority.ccs_amount).ceil();
+    let x2 = (rmod * ctx.accounts.mint_authority.ccs_amount).floor();
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),

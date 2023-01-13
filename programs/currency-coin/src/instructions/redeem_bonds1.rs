@@ -13,7 +13,7 @@ pub fn redeem_bonds1(
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.maturity_state, 0);
     let x0 = (ctx.accounts.owner_ccb1_account.amount as f64
-        * (ctx.accounts.mint_authority.rmod + 1.0)).ceil() as u64;
+        * (ctx.accounts.mint_authority.rmod + 1.0)).floor() as u64;
     let x1 = (ctx.accounts.owner_ccb1_account.amount as f64
         * ctx.accounts.mint_authority.rmod).floor() as u64;
     token::mint_to(
