@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 pub mod instructions;
 use instructions::*;
 
-declare_id!("9Xs2Dkn42QaeZwmTq7nN5gRbZXnwiUbCRTpjb4HJy65F");
+declare_id!("HbwxAXk8Zp2Kg5i7xm9XoeyShfGs8SqfzuS3q6AwQbRR");
 
 #[program]
 pub mod currency_coin {

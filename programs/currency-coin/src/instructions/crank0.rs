@@ -53,7 +53,8 @@ pub fn crank0(
 
     let clock: Clock = Clock::get().unwrap();
     // if pool0.cc0_amount >= 1.01 * pool0.ccb_amount {
-    if clock.unix_timestamp % 1000 < pool0.timestamp % 1000 {
+    let spw = 60*60*24*7;
+    if clock.unix_timestamp % spw < pool0.timestamp % spw {
         if pool0.maturity_state == 0 { pool0.maturity_state = 1; }
         if pool0.maturity_state == 2 { pool0.maturity_state = 3; }
     }

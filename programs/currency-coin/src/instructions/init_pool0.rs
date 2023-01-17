@@ -12,7 +12,7 @@ pub fn init_pool0(
     _ccs0_mint_bump: u8,
 ) -> Result<()> {
     assert_eq!(ctx.accounts.mint_authority.cc0_amount,0.0);
-    let x0: u64 = 10000000000;
+    let x0: u64 = 10_000_000_000;
     token::mint_to(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -53,7 +53,7 @@ pub fn init_pool0(
                 b"mint_auth_",
                 &[mint_auth_bump],
             ]]
-        ), 1000000,
+        ), 1_000_000,
     )?;
     let pool0 = &mut ctx.accounts.mint_authority;
     pool0.cc0_amount = x0 as f64;

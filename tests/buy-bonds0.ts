@@ -2,8 +2,8 @@ import * as anchor from "@project-serum/anchor";
 import { CurrencyCoin } from "../target/types/currency_coin";
 
 describe("currency-coin", () => {
-  const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
-  // const provider = anchor.AnchorProvider.env();
+  // const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
+  const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const payer = provider.wallet as anchor.Wallet;
   const program = anchor.workspace.CurrencyCoin as anchor.Program<CurrencyCoin>;

@@ -4,16 +4,16 @@ import { CurrencyCoin } from "../target/types/currency_coin";
 const sleep = require("sleep");
 const execSync = require('child_process').execSync;
 
-const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
-// const provider = anchor.AnchorProvider.env();
+// const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
+const provider = anchor.AnchorProvider.env();
 anchor.setProvider(provider);
 const payer = provider.wallet as anchor.Wallet;
 const program = anchor.workspace.CurrencyCoin as anchor.Program<CurrencyCoin>;
 
-const ccKey = "GLHZiMyU2cHYvbaCbCSKUpE7aoENq7S9Gv1pfyA7xWjW";
-const b0Key = "7jkBQ8AxVM6UVx2AfQFkMAjNsbhxPVnP2qD5XtdUZ3CY";
-const b1Key = "AG2ABtrFUD6M4gvUqDnf4j7sNtnmwayB25Qbo2yvQakJ";
-const s0Key = "EPXg4Y1a69XRNEq8ShkeV5N6ss9E83J4ehSDieKABDbk";
+const ccKey = "HdYSc1xZuuxsZzUQRcUUT9GGCwTreiq9HdziDa74ezz2";
+const b0Key = "7BFVxwh9yvk1e55J2h9uuNeh3ckEES1kPwVqWi6YuE19";
+const b1Key = "76iqKmoxSuXZUJs5fcx6y2nWFuzBoZSh3zPbz4EcHDmu";
+const s0Key = "yvYs3CVvHx69c1CMTnLuXgu2V5bsdH3wG5zZzBnTbZT";
 
 var mintAuth, mintAuthBump;
 var ccMint, ccMintBump;
@@ -42,10 +42,10 @@ async function start() {
           await sell_bonds0();
           await getBalances();
         }
-        if (ima > 1.0) {
+        if (ima > 10.0) {
           buyAm = balances[ccKey] / 100;
-          if (ima > 2.0) { buyAm = balances[ccKey] / 10; }
-          if (ima > 3.0) { buyAm = balances[ccKey]; }
+          if (ima > 20.0) { buyAm = balances[ccKey] / 10; }
+          if (ima > 30.0) { buyAm = balances[ccKey]; }
           await buy_bonds0();
           await getBalances();
         }
@@ -67,10 +67,10 @@ async function start() {
           await sell_bonds1();
           await getBalances();
         }
-        if (ima > 1.0) {
+        if (ima > 10.0) {
           buyAm = balances[ccKey] / 100;
-          if (ima > 2.0) { buyAm = balances[ccKey] / 10; }
-          if (ima > 3.0) { buyAm = balances[ccKey]; }
+          if (ima > 20.0) { buyAm = balances[ccKey] / 10; }
+          if (ima > 30.0) { buyAm = balances[ccKey]; }
           await buy_bonds1();
           await getBalances();
         }
