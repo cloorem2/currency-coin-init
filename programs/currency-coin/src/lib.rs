@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 pub mod instructions;
 use instructions::*;
 
-declare_id!("HbwxAXk8Zp2Kg5i7xm9XoeyShfGs8SqfzuS3q6AwQbRR");
+declare_id!("Hb2WTf3QB2omkRJYoHZ1fMVw2Pm8EYC6KHoSuPtjpbze");
 
 #[program]
 pub mod currency_coin {
@@ -68,43 +68,57 @@ pub mod currency_coin {
         )
     }
 
-    pub fn init_cc_ata(
-        ctx: Context<InitCcAta>,
+    pub fn create_ccb0_metadata(
+        ctx: Context<CreateCcb0Metadata>,
+        metadata_title: String,
+        metadata_symbol: String,
+        metadata_uri: String,
         mint_auth_bump: u8,
-        mint_bump: u8,
+        ccb0_mint_bump: u8,
     ) -> Result<()> {
-        init_cc_ata::init_cc_ata(
-            ctx, mint_auth_bump, mint_bump
+        create_ccb0_metadata::create_ccb0_metadata(
+            ctx,
+            metadata_title,
+            metadata_symbol,
+            metadata_uri,
+            mint_auth_bump,
+            ccb0_mint_bump
         )
     }
 
-    pub fn init_ccb0_ata(
-        ctx: Context<InitCcb0Ata>,
+    pub fn create_ccb1_metadata(
+        ctx: Context<CreateCcb1Metadata>,
+        metadata_title: String,
+        metadata_symbol: String,
+        metadata_uri: String,
         mint_auth_bump: u8,
-        mint_bump: u8,
+        ccb1_mint_bump: u8,
     ) -> Result<()> {
-        init_ccb0_ata::init_ccb0_ata(
-            ctx, mint_auth_bump, mint_bump
+        create_ccb1_metadata::create_ccb1_metadata(
+            ctx,
+            metadata_title,
+            metadata_symbol,
+            metadata_uri,
+            mint_auth_bump,
+            ccb1_mint_bump
         )
     }
 
-    pub fn init_ccb1_ata(
-        ctx: Context<InitCcb1Ata>,
+    pub fn create_ccs0_metadata(
+        ctx: Context<CreateCcs0Metadata>,
+        metadata_title: String,
+        metadata_symbol: String,
+        metadata_uri: String,
         mint_auth_bump: u8,
-        mint_bump: u8,
+        ccs0_mint_bump: u8,
     ) -> Result<()> {
-        init_ccb1_ata::init_ccb1_ata(
-            ctx, mint_auth_bump, mint_bump
-        )
-    }
-
-    pub fn init_ccs0_ata(
-        ctx: Context<InitCcs0Ata>,
-        mint_auth_bump: u8,
-        mint_bump: u8,
-    ) -> Result<()> {
-        init_ccs0_ata::init_ccs0_ata(
-            ctx, mint_auth_bump, mint_bump
+        create_ccs0_metadata::create_ccs0_metadata(
+            ctx,
+            metadata_title,
+            metadata_symbol,
+            metadata_uri,
+            mint_auth_bump,
+            ccs0_mint_bump
         )
     }
 
@@ -135,219 +149,6 @@ pub mod currency_coin {
             cc_mint_bump,
             ccb0_mint_bump,
             ccs0_mint_bump,
-        )
-    }
-
-    pub fn init_owner_ata(
-        ctx: Context<InitOwnerAta>,
-        mint_auth_bump: u8
-    ) -> Result<()> {
-        init_owner_ata::init_owner_ata(ctx, mint_auth_bump)
-    }
-
-    pub fn crank0(
-        ctx: Context<Crank0>,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        crank0::crank0(
-            ctx, mint_auth_bump, cc_mint_bump, ccs0_mint_bump
-        )
-    }
-
-    pub fn crank1(
-        ctx: Context<Crank1>,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        crank1::crank1(
-            ctx,
-            mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn crank3(
-        ctx: Context<Crank3>,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        crank3::crank3(
-            ctx,
-            mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn buy_bonds0(
-        ctx: Context<BuyBonds0>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        buy_bonds0::buy_bonds0(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn buy_bonds1(
-        ctx: Context<BuyBonds1>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        buy_bonds1::buy_bonds1(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn buy_shorts0(
-        ctx: Context<BuyShorts0>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        buy_shorts0::buy_shorts0(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-    pub fn buy_shorts1(
-        ctx: Context<BuyShorts1>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        buy_shorts1::buy_shorts1(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn sell_bonds0(
-        ctx: Context<SellBonds0>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        sell_bonds0::sell_bonds0(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn sell_bonds1(
-        ctx: Context<SellBonds1>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        sell_bonds1::sell_bonds1(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn sell_shorts0(
-        ctx: Context<SellShorts0>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        sell_shorts0::sell_shorts0(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn sell_shorts1(
-        ctx: Context<SellShorts1>,
-        amount: u64,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb1_mint_bump: u8,
-        ccs0_mint_bump: u8,
-    ) -> Result<()> {
-        sell_shorts1::sell_shorts1(
-            ctx, amount, mint_auth_bump,
-            cc_mint_bump,
-            ccb1_mint_bump,
-            ccs0_mint_bump,
-        )
-    }
-
-    pub fn redeem_bonds0(
-        ctx: Context<RedeemBonds0>,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccb1_mint_bump: u8,
-    ) -> Result<()> {
-        redeem_bonds0::redeem_bonds0(
-            ctx,
-            mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccb1_mint_bump,
-        )
-    }
-
-    pub fn redeem_bonds1(
-        ctx: Context<RedeemBonds1>,
-        mint_auth_bump: u8,
-        cc_mint_bump: u8,
-        ccb0_mint_bump: u8,
-        ccb1_mint_bump: u8,
-    ) -> Result<()> {
-        redeem_bonds1::redeem_bonds1(
-            ctx,
-            mint_auth_bump,
-            cc_mint_bump,
-            ccb0_mint_bump,
-            ccb1_mint_bump,
         )
     }
 }

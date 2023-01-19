@@ -1,7 +1,7 @@
 [features]
 seeds = false
 [programs.devnet]
-currency_coin = "HbwxAXk8Zp2Kg5i7xm9XoeyShfGs8SqfzuS3q6AwQbRR"
+currency_coin = "Hb2WTf3QB2omkRJYoHZ1fMVw2Pm8EYC6KHoSuPtjpbze"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -14,7 +14,7 @@ wallet = "/home/hedgehog/.config/solana/id.json"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 create-mint-auth = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-mint-auth.ts"
 create-mints = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-mints.ts"
-create-cc-metadata = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-cc-metadata.ts"
+create-metadatas = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/create-metadatas.ts"
 init-owner-atas = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-owner-atas.ts"
 init-atas = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-atas.ts"
 init-circulation = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init-circulation.ts"
