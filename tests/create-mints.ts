@@ -3,8 +3,8 @@ import { CurrencyCoin } from "../target/types/currency_coin";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 describe("currency-coin", () => {
-  // const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
-  const provider = anchor.AnchorProvider.env();
+  const provider = anchor.AnchorProvider.local("http://127.0.0.1:8899");
+  // const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const payer = provider.wallet as anchor.Wallet;
   const program = anchor.workspace.CurrencyCoin as anchor.Program<CurrencyCoin>;

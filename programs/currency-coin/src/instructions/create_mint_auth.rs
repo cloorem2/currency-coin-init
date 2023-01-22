@@ -14,7 +14,7 @@ pub fn create_mint_auth(
 pub struct CreateMintAuth<'info> {
     #[account(init,
         payer = payer,
-        space = 8 + 68 + 1,
+        space = 8 + 56 + 1,
         seeds = [ b"mint_auth_" ], bump
     )]
     pub mint_authority: Account<'info, MintAuth>,
@@ -28,17 +28,14 @@ pub struct CreateMintAuth<'info> {
 pub struct MintAuth {
     pub timestamp: i64,
 
-    pub cc0_amount: f64,
-    pub ccb_amount: f64,
-    pub cc1_amount: f64,
-    pub ccs_amount: f64,
-
-    pub imod: f64,
+    pub cmod: f64,
     pub rmod: f64,
+    pub imod: f64,
+    pub isum: f64,
+    pub smod: f64,
 
     pub ima0: f32,
     pub ima1: f32,
-    pub ima2: f32,
 
         // maturity_state 0 -- steady state
         //     b0 is accumulating interest, s0 is loosing interest
