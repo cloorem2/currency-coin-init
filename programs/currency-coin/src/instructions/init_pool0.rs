@@ -56,7 +56,7 @@ pub fn init_pool0(
         ), x0,
     )?;
     let pool0 = &mut ctx.accounts.mint_authority;
-    pool0.imod = 0.1;
+    pool0.imod = 0.0001;
     pool0.smod = 1.0;
     pool0.rmod = 1.0;
     pool0.cmod = 1.0;
